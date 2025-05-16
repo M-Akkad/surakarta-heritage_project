@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surakarta Heritage Ticketing</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="navbar-brand">Surakarta Heritage</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link active">Issue Ticket</a></li>
+                <li><a href="statistics.html" class="nav-link">Statistics</a></li>
+                <li><a href="#" id="logoutButton" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-content" id="issueTicketView">
+        <header class="page-header">
+            <h1>Surakarta Heritage Ticketing</h1>
+            <p>Issue tickets for visitors to Surakarta's heritage sites. Works offline with automatic syncing when connection is available.</p>
+        </header>
+
+        <section class="ticket-form-section">
+            <div class="form-container">
+                <h2>Issue New Ticket</h2>
+                <form id="issueTicketForm">
+                    <input type="hidden" id="locationName" name="locationName" value="Surakarta Heritage Site">
+                    <input type="hidden" id="locationCoords" name="locationCoords" value="0,0">
+
+                    <div class="form-group">
+                        <label for="visitorType">Visitor Type *</label>
+                        <select id="visitorType" name="visitorType" required>
+                            <option value="" disabled selected>Select Visitor Type</option>
+                            <option value="Local">Local</option>
+                            <option value="International">International</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="ageGroup">Age Group (optional)</label>
+                        <select id="ageGroup" name="ageGroup">
+                            <option value="" selected>Select Age Group (Optional)</option>
+                            <option value="Child">Child</option>
+                            <option value="Adult">Adult</option>
+                            <option value="Elderly">Elderly</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender (optional)</label>
+                        <select id="gender" name="gender">
+                            <option value="" selected>Select Gender (Optional)</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Issue Ticket</button>
+                    <p id="ticketError" class="error-message" style="display:none;"></p>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <div class="main-content" id="ticketGeneratedView" style="display:none;">
+        <div class="container">
+            <a href="#" id="backToFormButton" class="back-link">&larr; Back to Form</a>
+            <header class="page-header centered">
+                <h1>Ticket Generated</h1>
+                <p>The ticket has been successfully created and saved locally.</p>
+            </header>
+            <div class="ticket-generated-container">
+                <div class="ticket-card">
+                    <div class="ticket-header">Surakarta Heritage</div>
+                    <div class="ticket-subheader">Visitor Ticket</div>
+                    <div class="qr-code-container">
+                        <img id="qrCodeImage" src="" alt="QR Code">
+                    </div>
+                    <div id="ticketIdDisplay" class="ticket-id"></div>
+                    <div class="ticket-details">
+                        <p><strong>Visitor Type:</strong> <span id="ticketVisitorType"></span></p>
+                        <p><strong>Age Group:</strong> <span id="ticketAgeGroup"></span></p>
+                        <p><strong>Gender:</strong> <span id="ticketGender"></span></p>
+                        <p><strong>Issued:</strong> <span id="ticketIssuedAt"></span></p>
+                    </div>
+                    <p class="ticket-footer-note">Please keep this ticket with you during your visit.</p>
+                </div>
+                <button id="printTicketButton" class="btn btn-secondary">Print Ticket</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="pending-sync" id="pendingSyncIndicator" style="display:none;">
+        <span id="pendingCount">0</span> pending
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/ticket.js"></script>
+    <!-- QR Code generation library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script> 
+</body>
+</html> 
