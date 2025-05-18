@@ -1,44 +1,86 @@
 from sqlalchemy.orm import Session
-from .models import Ticket, User
-from .schemas import TicketCreate
-from sqlalchemy import func, and_
-from datetime import datetime
-from typing import Optional
+from sqlalchemy import func
+from app.models import Ticket, User
+from app.schemas import TicketCreate, TicketOut
+from typing import List, Dict
+from passlib.context import CryptContext
+from fastapi import HTTPException, status
 
+# Password hashing context
+pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def create_ticket(db: Session, ticket_data: TicketCreate):
-    ticket = Ticket(**ticket_data.dict())
-    db.add(ticket)
+def create_ticket(db, ticket_in: TicketCreate, owner_id: int) -> TicketOut:
+    data = ticket_in.dict()
+    data["owner_id"] = owner_id
+    db_ticket = Ticket(**data)
+    db.add(db_ticket)
     db.commit()
-    db.refresh(ticket)
-    return ticket
+    db.refresh(db_ticket)
+    return TicketOut.from_orm(db_ticket)
 
 
-def get_ticket_stats(db: Session):
-    return {
-        "total": db.query(Ticket).count(),
-        "by_age_group": dict(db.query(Ticket.age_group, func.count()).group_by(Ticket.age_group)),
-        "by_gender": dict(db.query(Ticket.gender, func.count()).group_by(Ticket.gender)),
-        "by_location": dict(db.query(Ticket.location_name, func.count()).group_by(Ticket.location_name))
+
+def search_tickets(db: Session, query: str) -> List[TicketOut]:
+    """Search tickets whose location name contains the query string."""
+    tickets = db.query(Ticket).filter(Ticket.location_name.contains(query)).all()
+    return [TicketOut.from_orm(t) for t in tickets]
+
+def update_ticket(db: Session, ticket_id: int, ticket_in: TicketCreate) -> TicketOut:
+    """Update an existing ticket and return its updated representation."""
+    db_ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    if not db_ticket:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
+    for field, value in ticket_in.dict().items():
+        setattr(db_ticket, field, value)
+    db.commit()
+    db.refresh(db_ticket)
+    return TicketOut.from_orm(db_ticket)
+
+
+def delete_ticket(db: Session, ticket_id: int) -> None:
+    """Delete a ticket by its ID."""
+    db_ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    if not db_ticket:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
+    db.delete(db_ticket)
+    db.commit()
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify that a plain password matches the stored hashed password."""
+    return pwd_ctx.verify(plain_password, hashed_password)
+
+
+def authenticate_user(db: Session, username: str, password: str) -> User:
+    """Authenticate a user by username and password."""
+    user = db.query(User).filter(User.username == username).first()
+    if not user or not verify_password(password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password"
+        )
+    return user
+
+
+def get_ticket_stats(db: Session) -> Dict[str, int]:
+    """Compute total tickets and counts per visitor_type, defaulting missing types to zero."""
+    total = db.query(func.count(Ticket.id)).scalar() or 0
+
+    # start with zeros for every expected type
+    stats: Dict[str, int] = {
+        "total_tickets": total,
+        "local_count":   0,
+        "tourist_count": 0,
     }
 
+    # fetch real counts
+    by_type = (
+        db.query(Ticket.visitor_type, func.count(Ticket.id))
+          .group_by(Ticket.visitor_type)
+          .all()
+    )
+    for visitor_type, count in by_type:
+        key = f"{visitor_type}_count"
+        stats[key] = count
 
-def authenticate_user(db: Session, username: str, password: str):
-    user = db.query(User).filter(User.username == username).first()
-    if user and user.hashed_password == password:
-        return user
-    return None
-
-
-def search_tickets(db: Session, visitor_type: Optional[str], age_group: Optional[str], location_name: Optional[str],
-                   start_date: Optional[datetime], end_date: Optional[datetime]):
-    query = db.query(Ticket)
-    if visitor_type:
-        query = query.filter(Ticket.visitor_type == visitor_type)
-    if age_group:
-        query = query.filter(Ticket.age_group == age_group)
-    if location_name:
-        query = query.filter(Ticket.location_name == location_name)
-    if start_date and end_date:
-        query = query.filter(Ticket.issued_at.between(start_date, end_date))
-    return query.all()
+    return stats

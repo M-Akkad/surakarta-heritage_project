@@ -50,7 +50,7 @@ backend/
 
 ```bash
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+python -m uvicorn app.main:app --reload
 ```
 
 ---
@@ -58,6 +58,7 @@ uvicorn app.main:app --reload
 ```bash
 uvicorn app.main:app --reload
 ```
+
 ---
 
 ## 🔐 Authentication Flow
@@ -82,7 +83,7 @@ Authorization: Bearer token-user
 ## 📮 API Endpoints
 
 | Method | Endpoint              | Access | Description                     |
-|--------|-----------------------|--------|---------------------------------|
+| ------ | --------------------- | ------ | ------------------------------- |
 | POST   | `/api/login`          | Public | Login to get access token       |
 | POST   | `/api/tickets`        | Staff  | Issue a ticket                  |
 | GET    | `/api/tickets/search` | Staff  | Filter/search issued tickets    |

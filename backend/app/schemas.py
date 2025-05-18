@@ -4,11 +4,12 @@ from typing import Optional
 
 
 class TicketCreate(BaseModel):
-    visitor_type: str
-    age_group: str
-    gender: str
+    visitor_type:  str
+    age_group:     str
+    gender:        str
     location_name: str
-    location_coords: str
+    # make coords optional with a default
+    location_coords: Optional[str] = None
 
 
 class TicketOut(TicketCreate):
@@ -16,12 +17,17 @@ class TicketOut(TicketCreate):
     issued_at: datetime
 
     class Config:
-        orm_mode = True
+        # Pydantic V2: enable attribute-based population (replaces orm_mode)
+        from_attributes = True
 
 
 class UserOut(BaseModel):
+    id: int
     username: str
     role: str
+    
+    class Config:
+        from_attributes = True
 
 
 class UserLogin(BaseModel):

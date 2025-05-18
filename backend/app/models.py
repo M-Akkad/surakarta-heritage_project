@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from .database import Base
 import datetime
 
@@ -10,8 +11,10 @@ class Ticket(Base):
     age_group = Column(String)
     gender = Column(String)
     location_name = Column(String)
-    location_coords = Column(String)
+    location_coords = Column(String, nullable=True, default=None)
     issued_at = Column(DateTime, default=datetime.datetime.utcnow)
+    owner_id     = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner = relationship("User", back_populates="tickets")
 
 
 class User(Base):
@@ -20,3 +23,4 @@ class User(Base):
     username = Column(String, unique=True)
     role = Column(String)
     hashed_password = Column(String)
+    tickets = relationship("Ticket", back_populates="owner")

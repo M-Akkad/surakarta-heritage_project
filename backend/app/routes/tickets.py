@@ -1,28 +1,81 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
-from typing import Optional, List
-from app.schemas import TicketCreate, TicketOut
-from app.crud import create_ticket, search_tickets
-from app.database import get_db
-from app.auth import get_current_user
+from typing import List
+from app.crud      import create_ticket, update_ticket, delete_ticket
+from app.schemas   import TicketCreate, TicketOut, UserOut
+from app.database  import get_db
+from app.auth      import get_current_user
+from app.models import Ticket
 
 router = APIRouter()
 
 
-@router.post("/tickets", response_model=TicketOut)
-def issue_ticket(ticket: TicketCreate, db: Session = Depends(get_db), user=Depends(get_current_user)):
-    return create_ticket(db, ticket)
-
-
-@router.get("/tickets/search", response_model=List[TicketOut])
-def filter_tickets(
-        visitor_type: Optional[str] = None,
-        age_group: Optional[str] = None,
-        location_name: Optional[str] = None,
-        start_date: Optional[datetime] = Query(None, alias="from"),
-        end_date: Optional[datetime] = Query(None, alias="to"),
-        db: Session = Depends(get_db),
-        user=Depends(get_current_user)
+@router.get("/", response_model=List[TicketOut])
+def list_tickets(
+    db: Session = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
 ):
-    return search_tickets(db, visitor_type, age_group, location_name, start_date, end_date)
+    if current_user.role == "admin":
+        # admin: all tickets
+        return db.query(Ticket).all()
+    # normal user: only own tickets
+    return db.query(Ticket).filter(Ticket.owner_id == current_user.id).all()
+
+@router.post("/", response_model=TicketOut)
+def issue_ticket(
+    ticket: TicketCreate,
+    db: Session = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    # attach owner_id
+    return create_ticket(db, ticket, owner_id=current_user.id)
+
+@router.put("/{ticket_id}", response_model=TicketOut)
+def edit_ticket(
+    ticket_id: int,
+    ticket: TicketCreate,
+    db: Session = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    # fetch the ticket
+    db_ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    if not db_ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    # **only admins** may update
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Admin privileges required to edit tickets"
+        )
+
+    # delegate to your CRUD helper
+    return update_ticket(db, ticket_id, ticket)
+
+
+@router.delete("/{ticket_id}", status_code=204)
+def delete_ticket_endpoint(
+    ticket_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
+):
+    db_ticket = db.query(Ticket).get(ticket_id)
+    if not db_ticket:
+        raise HTTPException(404, "Ticket not found")
+    if current_user.role != "admin" and db_ticket.owner_id != current_user.id:
+        raise HTTPException(403, "Not permitted")
+    delete_ticket(db, ticket_id)
+
+@router.get("/{ticket_id}", response_model=TicketOut)
+def get_ticket(
+    ticket_id: int,
+    db: Session = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user),
+):
+    db_ticket = db.query(Ticket).get(ticket_id)
+    if not db_ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    if current_user.role != "admin" and db_ticket.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not permitted")
+    return db_ticket
+

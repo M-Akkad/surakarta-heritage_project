@@ -1,0 +1,10 @@
+/* src/components/Home.css */
+.home-container {
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+}
+
+.card img {
+  height: 220px;
+  object-fit: cover;
+}

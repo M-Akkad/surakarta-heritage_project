@@ -1,3 +1,13 @@
-/backend/.env
-/backend/.idea
-.idea
+# VSCode and PyCharm
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Node/npm artifacts (optioneel extra voor frontend fallback)
+node_modules/
