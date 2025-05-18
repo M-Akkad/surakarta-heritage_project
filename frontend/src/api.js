@@ -1,4 +1,3 @@
-// src/api.js
 export const API_BASE =
   import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
@@ -14,14 +13,24 @@ export async function login(username, password) {
   return data;
 }
 
-export async function register(username, password) {
+export async function register(username, password, admin_code = "") {
   const res = await fetch(`${API_BASE}/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, admin_code }),
   });
-  return res.json();
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.detail || "Registration failed");
+  }
+
+  return data;
 }
+
+
+
 
 // universal fetcher: parses JSON (or returns null on 204), throws on error
 export function authFetch(token) {
@@ -72,6 +81,12 @@ export async function changeUserRole(token, username, role) {
 
 // fetch current user
 export async function fetchMe(token) {
-  const res = await authFetch(token)(`/auth/me`);
-  return res.ok ? res.json() : null;
+  const res = await fetch(`${API_BASE}/auth/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  if (!res.ok) throw new Error("Failed to fetch current user");
+  return res.json();
 }
+

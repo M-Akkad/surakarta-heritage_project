@@ -1,73 +1,65 @@
-// src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import
-{
-  login as loginRequest,
-  register as registerRequest,
-  fetchMe,
-} from '../api.js'
+import React, {createContext, useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {
+    login as loginRequest,
+    fetchMe, API_BASE
+} from '../api.js';
 
-export const AuthContext = createContext()
+export const AuthContext = createContext();
 
-export function AuthProvider({ children })
-{
-  const [token, setToken] = useState(localStorage.getItem('token'))
-  const [user, setUser] = useState(null)
-  const navigate = useNavigate()
+export function AuthProvider({children}) {
+    const [token, setToken] = useState(() => sessionStorage.getItem('token'));
+    const [user, setUser] = useState(null);
+    const navigate = useNavigate();
 
-  // whenever we get a token, fetch /auth/me
-  useEffect(() =>
-  {
-    if (!token)
-    {
-      setUser(null)
-      return
-    }
-    fetchMe(token)
-      .then(setUser)
-      .catch(() =>
-      {
-        // if token invalid, clear it
-        localStorage.removeItem('token')
-        setToken(null)
-        setUser(null)
-      })
-  }, [token])
-
-  const login = async (username, password) =>
-  {
-    // 1) hit /login
-    const { access_token } = await loginRequest(username, password);
-    // 2) store token
-    localStorage.setItem("token", access_token);
-    setToken(access_token);
-    // 3) immediately fetch the current user
-    const me = await fetchMe(access_token);
-    setUser(me);
-    // 4) navigate into the app
-    navigate("/tickets");
-  };
+    // Load user info on token change
+    useEffect(() => {
+        if (!token) {
+            setUser(null);
+            return;
+        }
+        fetchMe(token)
+            .then(setUser)
+            .catch(() => {
+                sessionStorage.removeItem('token');
+                setToken(null);
+                setUser(null);
+            });
+    }, [token]);
 
 
-  const register = async (username, password) =>
-  {
-    await registerRequest(username, password)
-    // after sign-up, send them to login
-    navigate('/login')
-  }
+    const login = async (username, password) => {
+        const {access_token} = await loginRequest(username, password);
+        sessionStorage.setItem('token', access_token);
+        setToken(access_token);
+        const me = await fetchMe(access_token);
+        setUser(me);
+        navigate('/tickets');
+    };
 
-  const logout = () =>
-  {
-    localStorage.removeItem('token')
-    setToken(null)
-    setUser(null)
-    navigate('/login')
-  }
+    const register = async (username, password, admin_code = "") => {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({username, password, admin_code}),
+        });
 
-  return (
-    <AuthContext.Provider value={{ token, user, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  )
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "Registration failed");
+        return data;
+    };
+
+
+    const logout = () => {
+        sessionStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+        navigate('/login');
+    };
+
+    return (
+        <AuthContext.Provider value={{token, user, login, register, logout}}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
