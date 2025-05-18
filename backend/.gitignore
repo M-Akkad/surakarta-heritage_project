@@ -9,7 +9,7 @@ __pycache__/
 .idea/
 
 # SQLite DB files
-*.db
+# *.db
 
 # Env file
 .env
