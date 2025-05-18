@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 import uuid
+import os
 
 from passlib.context import CryptContext
 
@@ -55,24 +56,40 @@ def get_current_user(
     return UserOut.from_orm(user)
 
 
-@router.post("/register", response_model=UserOut)
-def register(
-    user_in: UserLogin,
-    db: Session = Depends(get_db),
-):
-    """
-    Create a new user with role "user".  Admins must be promoted
-    manually in the database (or via your future user-management endpoint).
-    """
+
+
+
+
+@router.post("/register")
+def register(user_in: UserLogin, db: Session = Depends(get_db)):
     exists = db.query(User).filter(User.username == user_in.username).first()
     if exists:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Username already exists")
+
+    expected_code = os.getenv("ADMIN_SECRET_CODE", "")
+
+    if user_in.admin_code and user_in.admin_code != expected_code:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Invalid admin code")
+
     hashed = pwd_ctx.hash(user_in.password)
-    user = User(username=user_in.username, hashed_password=hashed, role="user")
+    role = "admin" if user_in.admin_code == expected_code else "user"
+
+    user = User(username=user_in.username, hashed_password=hashed, role=role)
     db.add(user)
     db.commit()
     db.refresh(user)
-    return UserOut.from_orm(user)
+
+    message = "Registered as admin" if role == "admin" else "Registered as user."
+
+    return JSONResponse(status_code=201, content={
+        "id": user.id,
+        "username": user.username,
+        "role": user.role,
+        "message": message
+    })
+
+
+
 
 
 @router.get("/me", response_model=UserOut)
@@ -84,6 +101,10 @@ def read_current_user(
     Frontend should call this after login to know who’s logged in.
     """
     return current
+
+from fastapi.responses import JSONResponse
+
+
 
 
 def admin_required(

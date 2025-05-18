@@ -30,6 +30,9 @@ class UserOut(BaseModel):
         from_attributes = True
 
 
+
 class UserLogin(BaseModel):
     username: str
     password: str
+    admin_code: Optional[str] = None
+
