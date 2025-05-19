@@ -5,6 +5,7 @@ from app.schemas import TicketCreate, TicketOut
 from typing import List, Dict
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
+from collections import Counter
 
 # Password hashing context
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -62,25 +63,51 @@ def authenticate_user(db: Session, username: str, password: str) -> User:
     return user
 
 
-def get_ticket_stats(db: Session) -> Dict[str, int]:
-    """Compute total tickets and counts per visitor_type, defaulting missing types to zero."""
+def get_ticket_stats(db: Session) -> Dict:
     total = db.query(func.count(Ticket.id)).scalar() or 0
 
-    # start with zeros for every expected type
-    stats: Dict[str, int] = {
+    stats = {
         "total_tickets": total,
-        "local_count":   0,
+        "local_count": 0,
         "tourist_count": 0,
+        "age_distribution": {},
+        "location_distribution": {},
+        "issued_at_distribution": {}
     }
 
-    # fetch real counts
+    # Get visitor type counts
     by_type = (
         db.query(Ticket.visitor_type, func.count(Ticket.id))
-          .group_by(Ticket.visitor_type)
-          .all()
+        .group_by(Ticket.visitor_type)
+        .all()
     )
     for visitor_type, count in by_type:
         key = f"{visitor_type}_count"
         stats[key] = count
 
+    # Age group distribution
+    age_counts = (
+        db.query(Ticket.age_group, func.count(Ticket.id))
+        .group_by(Ticket.age_group)
+        .all()
+    )
+    stats["age_distribution"] = {k: v for k, v in age_counts}
+
+    # Location distribution
+    loc_counts = (
+        db.query(Ticket.location_name, func.count(Ticket.id))
+        .group_by(Ticket.location_name)
+        .all()
+    )
+    stats["location_distribution"] = {k: v for k, v in loc_counts}
+
+    # Issued date distribution (by day)
+    date_counts = (
+        db.query(func.strftime("%Y-%m-%d", Ticket.issued_at), func.count(Ticket.id))
+        .group_by(func.strftime("%Y-%m-%d", Ticket.issued_at))
+        .all()
+    )
+    stats["issued_at_distribution"] = {k: v for k, v in date_counts}
+
     return stats
+

@@ -35,4 +35,11 @@ class UserLogin(BaseModel):
     username: str
     password: str
     admin_code: Optional[str] = None
+    role: Optional[str] = "user"
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    role: str
+
 

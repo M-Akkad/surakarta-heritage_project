@@ -1,14 +1,15 @@
 // src/components/EditTicket.jsx
-import React, {useState, useEffect, useContext} from 'react'
-import {useNavigate, useParams} from 'react-router-dom'
-import {AuthContext} from '../context/AuthContext'
-import {authFetch} from '../api.js'
+import React, { useState, useEffect, useContext } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { AuthContext } from '../context/AuthContext'
+import { authFetch, API_BASE } from '../api.js'
 
-export default function EditTicket() {
-    const {token} = useContext(AuthContext)
+export default function EditTicket()
+{
+    const { token } = useContext(AuthContext)
     const fetcher = authFetch(token)
     const navigate = useNavigate()
-    const {id} = useParams()
+    const { id } = useParams()
 
     const [form, setForm] = useState({
         visitor_type: 'tourist',
@@ -19,35 +20,41 @@ export default function EditTicket() {
 
     const [error, setError] = useState(null)
 
-    useEffect(() => {
+    useEffect(() =>
+    {
         fetcher(`/tickets/${id}`)
             .then(data => setForm(data))
             .catch(err => setError(err.detail || err.message))
     }, [id])
 
-    const handleChange = e => {
-        const {name, value} = e.target
-        setForm(f => ({...f, [name]: value}))
+
+    const handleChange = e =>
+    {
+        const { name, value } = e.target
+        setForm(f => ({ ...f, [name]: value }))
     }
 
-    const handleSubmit = async e => {
+    const handleSubmit = async e =>
+    {
         e.preventDefault()
         setError(null)
-        try {
+        try
+        {
             await fetcher(`/tickets/${id}`, {
                 method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form)
             })
             navigate('/tickets')
-        } catch (err) {
+        } catch (err)
+        {
             setError(err.detail || err.message)
         }
     }
 
     return (
         <div className="container-fluid px-3">
-            <div className="card mx-auto my-4 shadow-sm" style={{width: '100%', maxWidth: 600}}>
+            <div className="card mx-auto my-4 shadow-sm" style={{ width: '100%', maxWidth: 600 }}>
                 <div className="card-header"><h5>Edit Ticket #{id}</h5></div>
                 <div className="card-body">
                     {error && <div className="alert alert-danger">{error}</div>}
@@ -56,7 +63,7 @@ export default function EditTicket() {
                             <div key={field} className="mb-3">
                                 <label className="form-label text-capitalize">{field.replace('_', ' ')}</label>
                                 <select name={field} className="form-select" value={form[field]}
-                                        onChange={handleChange}>
+                                    onChange={handleChange}>
                                     {field === 'visitor_type' && (
                                         <>
                                             <option value="tourist">Tourist</option>

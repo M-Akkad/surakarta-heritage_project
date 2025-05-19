@@ -29,9 +29,6 @@ export async function register(username, password, admin_code = "") {
   return data;
 }
 
-
-
-
 // universal fetcher: parses JSON (or returns null on 204), throws on error
 export function authFetch(token) {
   return async (path, opts = {}) => {
@@ -83,10 +80,38 @@ export async function changeUserRole(token, username, role) {
 export async function fetchMe(token) {
   const res = await fetch(`${API_BASE}/auth/me`, {
     headers: {
-      Authorization: `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
   if (!res.ok) throw new Error("Failed to fetch current user");
   return res.json();
 }
 
+export async function createUser(token, userData) {
+  const res = await fetch(`${API_BASE}/users/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(userData),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to create user");
+  return data;
+}
+
+export function resetUserPassword(token, username, newPassword) {
+  return fetch(`${API_BASE}/users/${username}/reset-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ new_password: newPassword }),
+  }).then((res) => {
+    if (!res.ok) throw new Error("Failed to reset password");
+    return res.json();
+  });
+}

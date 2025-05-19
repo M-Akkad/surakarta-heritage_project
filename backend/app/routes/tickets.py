@@ -34,25 +34,24 @@ def issue_ticket(
 
 @router.put("/{ticket_id}", response_model=TicketOut)
 def edit_ticket(
-        ticket_id: int,
-        ticket: TicketCreate,
-        db: Session = Depends(get_db),
-        current_user: UserOut = Depends(get_current_user)
+    ticket_id: int,
+    ticket: TicketCreate,
+    db: Session = Depends(get_db),
+    current_user: UserOut = Depends(get_current_user)
 ):
-    # fetch the ticket
     db_ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not db_ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
 
-    # **only admins** may update
-    if current_user.role != "admin":
+    # allow admin OR owner
+    if current_user.role != "admin" and current_user.id != db_ticket.owner_id:
         raise HTTPException(
             status_code=403,
-            detail="Admin privileges required to edit tickets"
+            detail="You are not authorized to edit this ticket."
         )
 
-    # delegate to your CRUD helper
     return update_ticket(db, ticket_id, ticket)
+
 
 
 @router.delete("/{ticket_id}", status_code=204)

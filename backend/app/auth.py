@@ -17,6 +17,10 @@ router = APIRouter(tags=["auth"])
 # password hashing context
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def hash_password(password: str) -> str:
+    return pwd_ctx.hash(password)
+
+
 # tell FastAPI where to POST credentials to get a token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
