@@ -1,0 +1,26 @@
+/* styles/TicketTable.css */
+.ticket-table th,
+.ticket-table td {
+    vertical-align: middle;
+    padding: 0.75rem 1rem;
+}
+
+.ticket-table thead {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.ticket-table tbody tr:hover {
+    background-color: #f1f3f5;
+    transition: background-color 0.2s;
+}
+
+.ticket-table .btn-sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+#ticket-num-center {
+    text-align: center;
+}

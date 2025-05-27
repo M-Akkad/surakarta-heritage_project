@@ -1,12 +1,94 @@
-# React + Vite
+# Surakarta Heritage – Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the **frontend React app** for the Surakarta Heritage digital ticketing system.
 
-Currently, two official plugins are available:
+## 🎯 Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Visitors can:
+- Browse Surakarta heritage sites
+- Register/login as user or admin
+- Issue and manage tickets
+- Admins can view analytics & manage users
 
-## Expanding the ESLint configuration
+Built with **React**, **Bootstrap**, and uses **FastAPI** as backend.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🚀 Setup Instructions
+
+
+
+### Install Dependencies
+
+```bash
+  npm install
+```
+
+
+## 🧪 Run in Development
+
+```bash
+  npm run dev
+```
+
+Then open `http://localhost:5173`.
+
+---
+
+## 📦 Build for Production
+
+```bash
+  npm run build
+```
+
+Optional preview:
+
+```bash
+  npm run preview
+```
+
+---
+
+## 📱 Progressive Web App (PWA)
+
+- Configured using `vite-plugin-pwa`
+- Works as a mobile installable app
+- Manifest + icons under `public/`
+
+---
+
+## 🔐 Auth & Roles
+
+- Session stored in `sessionStorage`
+- Users can register normally
+- Admins must enter the admin code at registration
+- Admins can view:
+    - User management page (`/users`)
+    - Stats dashboard (`/stats`)
+    - Delete tickets
+
+---
+
+## 📁 Folder Structure Highlights
+
+```
+src/
+├── components/          # UI Components & Pages
+├── context/             # Auth context provider
+├── api.js               # API utilities
+├── App.jsx              # Main app with routes
+├── main.jsx             # Entry point
+└── styles/              # Global styles
+```
+
+---
+
+## 👨‍💻 Key Libraries
+
+- **React Router DOM** — Routing
+- **Bootstrap 5** — Styling
+- **Recharts** — Stats visualization
+- **vite-plugin-pwa** — PWA support
+
+---
+

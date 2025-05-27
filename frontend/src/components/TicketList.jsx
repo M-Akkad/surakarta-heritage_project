@@ -2,6 +2,8 @@ import React, {useEffect, useState, useContext} from "react";
 import {useNavigate} from "react-router-dom";
 import {AuthContext} from "../context/AuthContext";
 import {authFetch} from "../api";
+import './styling/TicketTable.css';
+
 
 export default function TicketList() {
     const {token, user} = useContext(AuthContext);
@@ -116,7 +118,9 @@ export default function TicketList() {
                 {/* Desktop + Tablet Table */}
                 <div className="card-body p-0 d-none d-md-block">
                     <div className="table-responsive">
-                        <table className="table table-hover align-middle mb-0">
+                        {/*<table className="table table-hover align-middle mb-0">*/}
+                        <table className="table ticket-table table-hover align-middle mb-0">
+
                             <thead className="table-light">
                             <tr>
                                 {[
@@ -147,7 +151,7 @@ export default function TicketList() {
                             {filtered.length > 0 ? (
                                 filtered.map(t => (
                                     <tr key={t.id}>
-                                        <td>{t.id}</td>
+                                        <td id = "ticket-num-center">{t.id}</td>
                                         <td>{t.visitor_type}</td>
                                         <td>{t.age_group}</td>
                                         <td>{t.gender}</td>
