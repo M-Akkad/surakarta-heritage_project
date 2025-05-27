@@ -1,6 +1,7 @@
 # Surakarta Heritage – Backend (FastAPI)
 
-REST API built with **FastAPI**, supporting role-based access control, ticketing, admin statistics, and user management for the Surakarta heritage system.
+REST API built with **FastAPI**, supporting role-based access control, ticketing, admin statistics, and user management
+for the Surakarta heritage system.
 
 ---
 
@@ -74,8 +75,8 @@ API docs: http://localhost:8000/docs
 
 - Token-based auth using `Bearer <token>`
 - Two roles:
-  - **admin** – Can manage users, tickets, and stats
-  - **user** – Can only manage their own tickets
+    - **admin** – Can manage users, tickets, and stats
+    - **user** – Can only manage their own tickets
 
 To register as admin, users must supply the correct `ADMIN_SECRET_CODE`.
 
@@ -84,11 +85,13 @@ To register as admin, users must supply the correct `ADMIN_SECRET_CODE`.
 ## 🔑 Endpoints Overview
 
 ### 🔸 `/api/auth`
+
 - `POST /register` — Register as user/admin
 - `POST /login` — Token auth via form data
 - `GET /me` — Get current logged-in user
 
 ### 🔸 `/api/tickets`
+
 - `GET /` — List tickets (admin sees all)
 - `POST /` — Create ticket (user only)
 - `GET /{id}` — View a ticket
@@ -96,12 +99,14 @@ To register as admin, users must supply the correct `ADMIN_SECRET_CODE`.
 - `DELETE /{id}` — Delete own ticket or admin
 
 ### 🔸 `/api/users` (Admin only)
+
 - `GET /` — List all users
 - `PATCH /{username}/role?role=user|admin` — Change user role
 - `DELETE /id/{user_id}` — Delete user
 - `POST /{username}/reset-password` — Reset user password
 
 ### 🔸 `/api/stats` (Admin only)
+
 - `GET /` — Ticket totals, breakdowns by type, age, location, and issue date
 
 ---
@@ -116,6 +121,7 @@ To register as admin, users must supply the correct `ADMIN_SECRET_CODE`.
 ## 🧪 Testing the API
 
 Use tools like **Postman** or the built-in **Swagger UI**:
+
 - http://localhost:8000/docs
 
 ---

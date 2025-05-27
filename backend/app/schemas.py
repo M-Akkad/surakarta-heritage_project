@@ -8,7 +8,6 @@ class TicketCreate(BaseModel):
     age_group: str
     gender: str
     location_name: str
-    # make coords optional with a default
     location_coords: Optional[str] = None
 
 
@@ -17,7 +16,6 @@ class TicketOut(TicketCreate):
     issued_at: datetime
 
     class Config:
-        # Pydantic V2: enable attribute-based population (replaces orm_mode)
         from_attributes = True
 
 

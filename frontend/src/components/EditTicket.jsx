@@ -1,4 +1,3 @@
-// src/components/EditTicket.jsx
 import React, { useState, useEffect, useContext } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'

@@ -14,7 +14,6 @@ app = FastAPI(
     version="1.0"
 )
 
-# Enable CORS for the React frontend
 origins = [
     "http://localhost:5173"
 ]
@@ -26,21 +25,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create database tables on startup
 Base.metadata.create_all(bind=engine)
 
-# Include authentication endpoints under /api/auth
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
-# New user‐mgmt router under /api/users
 app.include_router(users_router, prefix="/api/users", tags=["users"])
-# Include ticket endpoints under /api/tickets
 app.include_router(tickets_router, prefix="/api/tickets", tags=["tickets"])
-# Include statistics endpoints under /api/stats
 app.include_router(stats_router, prefix="/api/stats", tags=["stats"])
 
 
 # Root endpoint returning a welcome message
 @app.get("/")
 def read_root():
-    """Root endpoint that returns a welcome message."""
     return {"message": "Welcome to Surakarta Heritage API"}

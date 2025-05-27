@@ -1,15 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
 from typing import List
-from grpc import Status
+
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi import status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
+from app.auth import admin_required
+from app.auth import hash_password
 from app.database import get_db
 from app.models import User
 from app.schemas import UserLogin, UserOut
-from app.auth import admin_required
-from app.schemas import UserCreate
-from app.auth import hash_password
-from fastapi import status
-from pydantic import BaseModel
 
 router = APIRouter()
 

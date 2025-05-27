@@ -5,9 +5,7 @@ from app.schemas import TicketCreate, TicketOut
 from typing import List, Dict
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
-from collections import Counter
 
-# Password hashing context
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -22,13 +20,11 @@ def create_ticket(db, ticket_in: TicketCreate, owner_id: int) -> TicketOut:
 
 
 def search_tickets(db: Session, query: str) -> List[TicketOut]:
-    """Search tickets whose location name contains the query string."""
     tickets = db.query(Ticket).filter(Ticket.location_name.contains(query)).all()
     return [TicketOut.from_orm(t) for t in tickets]
 
 
 def update_ticket(db: Session, ticket_id: int, ticket_in: TicketCreate) -> TicketOut:
-    """Update an existing ticket and return its updated representation."""
     db_ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not db_ticket:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
@@ -40,7 +36,6 @@ def update_ticket(db: Session, ticket_id: int, ticket_in: TicketCreate) -> Ticke
 
 
 def delete_ticket(db: Session, ticket_id: int) -> None:
-    """Delete a ticket by its ID."""
     db_ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not db_ticket:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found")
@@ -49,12 +44,10 @@ def delete_ticket(db: Session, ticket_id: int) -> None:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify that a plain password matches the stored hashed password."""
     return pwd_ctx.verify(plain_password, hashed_password)
 
 
 def authenticate_user(db: Session, username: str, password: str) -> User:
-    """Authenticate a user by username and password."""
     user = db.query(User).filter(User.username == username).first()
     if not user or not verify_password(password, user.hashed_password):
         raise HTTPException(
@@ -76,7 +69,6 @@ def get_ticket_stats(db: Session) -> Dict:
         "issued_at_distribution": {}
     }
 
-    # Get visitor type counts
     by_type = (
         db.query(Ticket.visitor_type, func.count(Ticket.id))
         .group_by(Ticket.visitor_type)
@@ -86,7 +78,6 @@ def get_ticket_stats(db: Session) -> Dict:
         key = f"{visitor_type}_count"
         stats[key] = count
 
-    # Age group distribution
     age_counts = (
         db.query(Ticket.age_group, func.count(Ticket.id))
         .group_by(Ticket.age_group)
@@ -94,7 +85,6 @@ def get_ticket_stats(db: Session) -> Dict:
     )
     stats["age_distribution"] = {k: v for k, v in age_counts}
 
-    # Location distribution
     loc_counts = (
         db.query(Ticket.location_name, func.count(Ticket.id))
         .group_by(Ticket.location_name)
@@ -102,7 +92,6 @@ def get_ticket_stats(db: Session) -> Dict:
     )
     stats["location_distribution"] = {k: v for k, v in loc_counts}
 
-    # Issued date distribution (by day)
     date_counts = (
         db.query(func.strftime("%Y-%m-%d", Ticket.issued_at), func.count(Ticket.id))
         .group_by(func.strftime("%Y-%m-%d", Ticket.issued_at))

@@ -14,7 +14,6 @@ from app.schemas import UserLogin, UserOut
 
 router = APIRouter(tags=["auth"])
 
-# password hashing context
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -22,10 +21,8 @@ def hash_password(password: str) -> str:
     return pwd_ctx.hash(password)
 
 
-# tell FastAPI where to POST credentials to get a token
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-# in-memory token store { token_str: UserOut }
 tokens: dict[str, UserOut] = {}
 
 
@@ -49,11 +46,6 @@ def get_current_user(
         token: str = Depends(oauth2_scheme),
         db: Session = Depends(get_db)
 ) -> UserOut:
-    """
-    Read the Authorization: Bearer <token> header,
-    look up the user in our in-memory store.
-    """
-    # user = tokens.get(token)
     user_id = tokens.get(token)
     if not user_id:
         raise HTTPException(401, "Invalid token")
@@ -96,7 +88,6 @@ def read_current_user(
 ):
     """
     Return the currently authenticated user (username & role).
-    Frontend should call this after login to know who’s logged in.
     """
     return current
 
@@ -107,9 +98,6 @@ from fastapi.responses import JSONResponse
 def admin_required(
         current_user: UserOut = Depends(get_current_user)
 ) -> UserOut:
-    """
-    FastAPI dependency: use this on routes that only admins may call.
-    """
     if current_user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
