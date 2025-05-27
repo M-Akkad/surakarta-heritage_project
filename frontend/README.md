@@ -4,7 +4,7 @@ This is the **frontend React app** for the Surakarta Heritage digital ticketing 
 
 ## 🎯 Overview
 
-Visitors can:
+User can:
 - Browse Surakarta heritage sites
 - Register/login as user or admin
 - Issue and manage tickets
