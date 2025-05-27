@@ -4,9 +4,9 @@ from typing import Optional
 
 
 class TicketCreate(BaseModel):
-    visitor_type:  str
-    age_group:     str
-    gender:        str
+    visitor_type: str
+    age_group: str
+    gender: str
     location_name: str
     # make coords optional with a default
     location_coords: Optional[str] = None
@@ -25,10 +25,9 @@ class UserOut(BaseModel):
     id: int
     username: str
     role: str
-    
+
     class Config:
         from_attributes = True
-
 
 
 class UserLogin(BaseModel):
@@ -37,9 +36,8 @@ class UserLogin(BaseModel):
     admin_code: Optional[str] = None
     role: Optional[str] = "user"
 
+
 class UserCreate(BaseModel):
     username: str
     password: str
     role: str
-
-

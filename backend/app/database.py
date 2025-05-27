@@ -9,7 +9,6 @@ load_dotenv()
 # Retrieve the DATABASE_URL, fallback to sqlite if not defined or empty
 raw_url = os.getenv("DATABASE_URL")
 
-
 # Create the SQLAlchemy engine; sqlite needs check_same_thread
 engine = create_engine(
     raw_url,

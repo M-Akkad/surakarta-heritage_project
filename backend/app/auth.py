@@ -17,6 +17,7 @@ router = APIRouter(tags=["auth"])
 # password hashing context
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def hash_password(password: str) -> str:
     return pwd_ctx.hash(password)
 
@@ -30,8 +31,8 @@ tokens: dict[str, UserOut] = {}
 
 @router.post("/login")
 def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db),
+        form_data: OAuth2PasswordRequestForm = Depends(),
+        db: Session = Depends(get_db),
 ):
     """
     Verify username & password, then return a bearer token.
@@ -45,8 +46,8 @@ def login(
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
+        token: str = Depends(oauth2_scheme),
+        db: Session = Depends(get_db)
 ) -> UserOut:
     """
     Read the Authorization: Bearer <token> header,
@@ -58,10 +59,6 @@ def get_current_user(
         raise HTTPException(401, "Invalid token")
     user = db.get(User, user_id)
     return UserOut.from_orm(user)
-
-
-
-
 
 
 @router.post("/register")
@@ -93,12 +90,9 @@ def register(user_in: UserLogin, db: Session = Depends(get_db)):
     })
 
 
-
-
-
 @router.get("/me", response_model=UserOut)
 def read_current_user(
-    current: UserOut = Depends(get_current_user)
+        current: UserOut = Depends(get_current_user)
 ):
     """
     Return the currently authenticated user (username & role).
@@ -106,13 +100,12 @@ def read_current_user(
     """
     return current
 
+
 from fastapi.responses import JSONResponse
 
 
-
-
 def admin_required(
-    current_user: UserOut = Depends(get_current_user)
+        current_user: UserOut = Depends(get_current_user)
 ) -> UserOut:
     """
     FastAPI dependency: use this on routes that only admins may call.

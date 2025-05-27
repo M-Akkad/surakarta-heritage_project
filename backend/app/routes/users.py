@@ -11,8 +11,6 @@ from app.auth import hash_password
 from fastapi import status
 from pydantic import BaseModel
 
-
-
 router = APIRouter()
 
 
@@ -41,9 +39,9 @@ def change_role(
 
 @router.delete("/id/{user_id}", response_model=dict)
 def delete_user_by_id(
-    user_id: int,
-    db: Session = Depends(get_db),
-    admin=Depends(admin_required)
+        user_id: int,
+        db: Session = Depends(get_db),
+        admin=Depends(admin_required)
 ):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -53,12 +51,11 @@ def delete_user_by_id(
     return {"detail": f"User {user_id} deleted successfully"}
 
 
-
 @router.post("/", response_model=UserOut)
 def create_user(
-    user: UserLogin,
-    db: Session = Depends(get_db),
-    admin=Depends(admin_required)
+        user: UserLogin,
+        db: Session = Depends(get_db),
+        admin=Depends(admin_required)
 ):
     exists = db.query(User).filter(User.username == user.username).first()
     if exists:
@@ -80,12 +77,13 @@ def create_user(
 class PasswordUpdate(BaseModel):
     new_password: str
 
+
 @router.post("/{username}/reset-password")
 def reset_password(
-    username: str,
-    body: PasswordUpdate,
-    db: Session = Depends(get_db),
-    admin=Depends(admin_required)
+        username: str,
+        body: PasswordUpdate,
+        db: Session = Depends(get_db),
+        admin=Depends(admin_required)
 ):
     user = db.query(User).filter(User.username == username).first()
     if not user:

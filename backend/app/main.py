@@ -39,10 +39,8 @@ app.include_router(tickets_router, prefix="/api/tickets", tags=["tickets"])
 app.include_router(stats_router, prefix="/api/stats", tags=["stats"])
 
 
-
 # Root endpoint returning a welcome message
 @app.get("/")
 def read_root():
     """Root endpoint that returns a welcome message."""
     return {"message": "Welcome to Surakarta Heritage API"}
-

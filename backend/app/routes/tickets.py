@@ -34,10 +34,10 @@ def issue_ticket(
 
 @router.put("/{ticket_id}", response_model=TicketOut)
 def edit_ticket(
-    ticket_id: int,
-    ticket: TicketCreate,
-    db: Session = Depends(get_db),
-    current_user: UserOut = Depends(get_current_user)
+        ticket_id: int,
+        ticket: TicketCreate,
+        db: Session = Depends(get_db),
+        current_user: UserOut = Depends(get_current_user)
 ):
     db_ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
     if not db_ticket:
@@ -51,7 +51,6 @@ def edit_ticket(
         )
 
     return update_ticket(db, ticket_id, ticket)
-
 
 
 @router.delete("/{ticket_id}", status_code=204)

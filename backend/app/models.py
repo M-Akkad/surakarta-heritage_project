@@ -13,7 +13,7 @@ class Ticket(Base):
     location_name = Column(String)
     location_coords = Column(String, nullable=True, default=None)
     issued_at = Column(DateTime, default=datetime.datetime.utcnow)
-    owner_id     = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     owner = relationship("User", back_populates="tickets")
 
 

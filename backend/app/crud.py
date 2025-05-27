@@ -10,6 +10,7 @@ from collections import Counter
 # Password hashing context
 pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 def create_ticket(db, ticket_in: TicketCreate, owner_id: int) -> TicketOut:
     data = ticket_in.dict()
     data["owner_id"] = owner_id
@@ -20,11 +21,11 @@ def create_ticket(db, ticket_in: TicketCreate, owner_id: int) -> TicketOut:
     return TicketOut.from_orm(db_ticket)
 
 
-
 def search_tickets(db: Session, query: str) -> List[TicketOut]:
     """Search tickets whose location name contains the query string."""
     tickets = db.query(Ticket).filter(Ticket.location_name.contains(query)).all()
     return [TicketOut.from_orm(t) for t in tickets]
+
 
 def update_ticket(db: Session, ticket_id: int, ticket_in: TicketCreate) -> TicketOut:
     """Update an existing ticket and return its updated representation."""
@@ -110,4 +111,3 @@ def get_ticket_stats(db: Session) -> Dict:
     stats["issued_at_distribution"] = {k: v for k, v in date_counts}
 
     return stats
-
